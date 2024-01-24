@@ -15,7 +15,7 @@ class TopicoController extends Controller
      */
     public function index()
     {
-        $vs_topicos = Topico::where('topico_id', '=', 1)
+        $vs_topicos = Topico::where('user_id', '>', 0)
         ->join('users', 'users.id', '=', 'topicos.user_id')
         ->select('users.name', 'users.email', 'topicos.*')
         ->get();
@@ -26,54 +26,54 @@ class TopicoController extends Controller
 
 
     public function cargarDT($consulta)
-{
-$topico = [];
-foreach ($consulta as $key => $value) {
-$ruta = "eliminar" . $value['id'];
-$eliminar = '';//route('delete-video', $value['id']);
-$actualizar = route('topicos.edit', $value['id']);
-$acciones = '
-<div class="btn-acciones">
-<div class="btn-circle">
-<a href="' . $actualizar . '" role="button" class="btn btn-success" title="Actualizar">
-<i class="far fa-edit">Actulizar</i>
-</a>
-<a href="#' . $ruta . '" role="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#' . $ruta . '" title="Eliminar">
-<i class="far fa-trash-alt">Eliminar</i>
-</a>
-</div>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="' . $ruta . '" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header">
-<h5 class="modal-title" id="exampleModalLabel">¿Seguro que deseas eliminar este video?</h5>
-<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-</div>
-<div class="modal-body">
-<p class="text-primary">
-<small>
-' . $value['id'] . ', ' . $value['title'] . ' </small>
-</p>
-</div>
-<div class="modal-footer">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-<a href="' . $eliminar . '" type="button" class="btn btn-danger">Eliminar</a>
-</div>
-</div>
-</div>
-</div>
-';
-$topico[$key] = array(
-$acciones,
-$value['topico_titulo'],
-$value['contenido'],
-$value['name'],
-$value['email']
-);
-}
-return $topico;
+        {
+        $topico = [];
+        foreach ($consulta as $key => $value) {
+        $ruta = "eliminar" . $value['id'];
+        $eliminar = route('delete-topico', $value['id']);
+        $actualizar = route('topicos.edit', $value['id']);
+        $acciones = '
+        <div class="btn-acciones">
+        <div class="btn-circle">
+        <a href="' . $actualizar . '" role="button" class="btn btn-success" title="Actualizar">
+        <i class="far fa-edit">Actulizar</i>
+        </a>
+        <a href="#' . $ruta . '" role="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#' . $ruta . '" title="Eliminar">
+        <i class="far fa-trash-alt">Eliminar</i>
+        </a>
+        </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="' . $ruta . '" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">¿Seguro que deseas eliminar este video?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        <p class="text-primary">
+        <small>
+        ' . $value['id'] . ', ' . $value['title'] . ' </small>
+        </p>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <a href="' . $eliminar . '" type="button" class="btn btn-danger">Eliminar</a>
+        </div>
+        </div>
+        </div>
+        </div>
+        ';
+        $topico[$key] = array(
+        $acciones,
+        $value['topico_titulo'],
+        $value['contenido'],
+        $value['name'],
+        $value['email']
+        );
+        }
+        return $topico;
 }
 
 
@@ -104,7 +104,6 @@ return $topico;
     $topico->user_id = $user->id;
     $topico->topico_titulo = $request->input('topico_titulo');
     $topico->contenido = $request->input('contenido');
-    $topico->topico_id = 1;
     $topico->save();
     return redirect()->route('topicos.index')->with(array(
     'message' => 'El Topico se ha subido correctamente'
@@ -124,7 +123,11 @@ return $topico;
      */
     public function edit(string $id)
     {
-        //
+        $topico = Topico::findOrFail($id);
+        return view('topicos.edit', array(
+        'topico' => $topico
+        ));
+
     }
 
     /**
@@ -132,7 +135,20 @@ return $topico;
      */
     public function update(Request $request, string $id)
     {
-        //
+        $this->validate($request, [
+            'title' => 'required|min:5',
+            'description' => 'required',
+            ]);
+            $user = Auth::user();
+            $topico = Topico::findOrFail($id);
+            $topico->user_id = $user->id;
+            $topico->title = $request->input('topico_titulo');
+            $topico->description = $request->input('contenido');
+            $topico->save();
+            return redirect()->route('topicos.index')->with(array(
+            'message' => 'El topico se ha actualizado correctamente'
+            ));
+            
     }
 
     /**
@@ -142,4 +158,28 @@ return $topico;
     {
         //
     }
+
+
+    public function delete_topico($id)
+        {
+            $topico  = Topico::find($id);
+            if ($topico) {
+            $topico->delete();
+            
+            return redirect()->route('topicos.index')->with(array(
+            "message" => "El video se ha eliminado correctamente"
+            ));
+            } else {
+            return redirect()->route('topicios.index')->with(array(
+            "message" => "El video que trata de eliminar no existe"
+            ));
+            }
+            }
+            
+        
+
+
+
+
+
 }

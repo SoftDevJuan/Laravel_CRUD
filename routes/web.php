@@ -24,3 +24,10 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::resource('/topicos', App\Http\Controllers\TopicoController::class)
 ->except(['show'])
 ->middleware('auth');
+
+Route::get('delete-video/{id}',[
+    'as' => 'delete-topico',
+    'middleware' => 'auth',
+    'uses'=> 'App\Http\Controllers\TopicoController@delete_topico'
+    ]);
+    

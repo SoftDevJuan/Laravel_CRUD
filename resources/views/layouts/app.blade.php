@@ -93,6 +93,11 @@ Gkvsg+p" crossorigin="anonymous" />
 
         <main class="py-4">
             @yield('content')
+            <footer class="col-md-10 col-md-offset-1">
+                <hr />
+                <p>Curso de Laravel 10, 2024</p>
+                </footer>
+
         </main>
     </div>
 </body>
