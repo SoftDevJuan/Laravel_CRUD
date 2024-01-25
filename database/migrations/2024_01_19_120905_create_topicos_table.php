@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->integer('user_id');
+            $table->integer('topico_id');
             $table->string('topico_titulo',200);
             $table->string('contenido', 500);
 

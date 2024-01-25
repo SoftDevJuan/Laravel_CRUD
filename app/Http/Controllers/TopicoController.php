@@ -136,14 +136,14 @@ class TopicoController extends Controller
     public function update(Request $request, string $id)
     {
         $this->validate($request, [
-            'title' => 'required|min:5',
-            'description' => 'required',
+            'topico_titulo' => 'required|min:5',
+            'contenido' => 'required',
             ]);
             $user = Auth::user();
             $topico = Topico::findOrFail($id);
             $topico->user_id = $user->id;
-            $topico->title = $request->input('topico_titulo');
-            $topico->description = $request->input('contenido');
+            $topico->topico_titulo = $request->input('topico_titulo');
+            $topico->contenido = $request->input('contenido');
             $topico->save();
             return redirect()->route('topicos.index')->with(array(
             'message' => 'El topico se ha actualizado correctamente'
@@ -170,7 +170,7 @@ class TopicoController extends Controller
             "message" => "El video se ha eliminado correctamente"
             ));
             } else {
-            return redirect()->route('topicios.index')->with(array(
+            return redirect()->route('topicos.index')->with(array(
             "message" => "El video que trata de eliminar no existe"
             ));
             }
